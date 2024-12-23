@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator BMI dan Rata-rata Berat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            margin: 30px auto;
+            padding: 30px 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="number"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 11pt;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12pt;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        textarea {
+            resize: none;
+            height: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kalkulator BMI</h1>
+        <form id="bmiForm">
+            <label for="weight">Berat Badan (kg):</label>
+            <input type="number" id="weight" required>
+            <label for="height">Tinggi Badan (cm):</label>
+            <input type="number" id="height" required>
+            <button type="submit">Hitung BMI</button>
+        </form>
+        <div class="result" id="bmiResult"></div>
+
+        <hr>
+        <h2>Rata-rata Berat Badan</h2>
+        <label for="weights">Masukkan Berat Badan (pisahkan dengan koma):</label>
+        <textarea id="weights" placeholder="Contoh: 60,70,55,80,65"></textarea>
+        <button id="calculateAverageWeightRecursive">Rata-rata Berat (Rekursif)</button>
+        <button id="calculateAverageWeightIterative">Rata-rata Berat (Iteratif)</button>
+        <div class="result" id="averageWeightResult"></div>
+        <div class="result" id="timeAverageWeight"></div>
+
+        <hr>
+        <h2>Rata-rata BMI</h2>
+        <button id="calculateAverageBMIRecursive">Rata-rata BMI (Rekursif)</button>
+        <button id="calculateAverageBMIIterative">Rata-rata BMI (Iteratif)</button>
+        <div class="result" id="averageBMIResult"></div>
+        <div class="result" id="timeAverageBMI"></div>
+    </div>
+
+    <script>
+        let globalWeights = [];
+        let globalHeights = [];
+
+        // Update textarea for weights
+        function updateWeightsTextarea() {
+            document.getElementById('weights').value = globalWeights.join(',');
+        }
+
+        // Add weight and height from form
+        document.getElementById('bmiForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value) / 100;
+
+            if (!isNaN(weight) && !isNaN(height)) {
+                globalWeights.push(weight);
+                globalHeights.push(height * 100);
+                updateWeightsTextarea();
+            }
+        });
+
+        // Recursive average weight function (from N to 0)
+        function recursiveAverageWeight(weights, index = weights.length - 1) {
+            if (index < 0) return 0;
+            return weights[index] / weights.length + recursiveAverageWeight(weights, index - 1);
+        }
+
+        // Iterative average weight function (loop-based)
+        function iterativeAverageWeight(weights) {
+            let total = 0;
+            for (let i = 0; i < weights.length; i++) {
+                total += weights[i];
+            }
+            return weights.length > 0 ? total / weights.length : 0;
+        }
+
+        // Recursive average BMI function (from N to 0)
+        function recursiveAverageBMI(weights, heights, index = weights.length - 1) {
+            if (index < 0) return 0;
+            const bmi = weights[index] / ((heights[index] / 100) ** 2);
+            return bmi / weights.length + recursiveAverageBMI(weights, heights, index - 1);
+        }
+
+        // Iterative average BMI function (loop-based)
+        function iterativeAverageBMI(weights, heights) {
+            let totalBMI = 0;
+            for (let i = 0; i < weights.length; i++) {
+                totalBMI += weights[i] / ((heights[i] / 100) ** 2);
+            }
+            return weights.length > 0 ? totalBMI / weights.length : 0;
+        }
+
+        // Button handlers
+        document.getElementById('calculateAverageWeightRecursive').addEventListener('click', function () {
+            const start = performance.now();
+            const average = recursiveAverageWeight(globalWeights);
+            const end = performance.now();
+
+            document.getElementById('averageWeightResult').textContent = 'Rata-rata Berat (Rekursif): ' + average.toFixed(2) + ' kg';
+            document.getElementById('timeAverageWeight').textContent = 'Waktu Eksekusi: ' + (end - start).toFixed(2) + ' ms';
+        });
+
+        document.getElementById('calculateAverageWeightIterative').addEventListener('click', function () {
+            const start = performance.now();
+            const average = iterativeAverageWeight(globalWeights);
+            const end = performance.now();
+
+            document.getElementById('averageWeightResult').textContent = 'Rata-rata Berat (Iteratif): ' + average.toFixed(2) + ' kg';
+            document.getElementById('timeAverageWeight').textContent = 'Waktu Eksekusi: ' + (end - start).toFixed(2) + ' ms';
+        });
+
+        document.getElementById('calculateAverageBMIRecursive').addEventListener('click', function () {
+            const start = performance.now();
+            const average = recursiveAverageBMI(globalWeights, globalHeights);
+            const end = performance.now();
+
+            document.getElementById('averageBMIResult').textContent = 'Rata-rata BMI (Rekursif): ' + average.toFixed(2);
+            document.getElementById('timeAverageBMI').textContent = 'Waktu Eksekusi: ' + (end - start).toFixed(2) + ' ms';
+        });
+
+        document.getElementById('calculateAverageBMIIterative').addEventListener('click', function () {
+            const start = performance.now();
+            const average = iterativeAverageBMI(globalWeights, globalHeights);
+            const end = performance.now();
+
+            document.getElementById('averageBMIResult').textContent = 'Rata-rata BMI (Iteratif): ' + average.toFixed(2);
+            document.getElementById('timeAverageBMI').textContent = 'Waktu Eksekusi: ' + (end - start).toFixed(2) + ' ms';
+        });
+
+        // Populate example data
+        if (globalWeights.length === 0) {
+            for (let i = 0; i < 50; i++) {
+                globalWeights.push(Math.floor(Math.random() * 50) + 50); // Random weights
+                globalHeights.push(150 + Math.floor(Math.random() * 50)); // Random heights
+            }
+            updateWeightsTextarea();
+        }
+    </script>
+</body>
+</html>
